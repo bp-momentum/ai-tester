@@ -12,7 +12,11 @@
   },
   "tauri": {
     "allowlist": {
-      "all": false
+      "dialog": {
+        "all": true,
+        "open": true,
+        "save": true
+      }
     },
     "bundle": {
       "active": true,
@@ -29,7 +33,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "de.momentum.ai-tester",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -59,7 +63,9 @@
         "height": 600,
         "resizable": true,
         "title": "Momentum AI Tester",
-        "width": 800
+        "width": 800,
+        "minWidth": 600,
+        "minHeight": 400 
       }
     ]
   }

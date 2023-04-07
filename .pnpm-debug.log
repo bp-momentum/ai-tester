@@ -1,0 +1,82 @@
+{
+  "0 debug pnpm:scope": {
+    "selected": 1
+  },
+  "1 debug pnpm:package-manifest": {
+    "initial": {
+      "name": "ai-tester",
+      "version": "0.0.1",
+      "private": true,
+      "scripts": {
+        "dev": "vite dev",
+        "build": "vite build",
+        "preview": "vite preview",
+        "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+        "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+        "lint": "prettier --plugin-search-dir . --check . && eslint .",
+        "format": "prettier --plugin-search-dir . --write ."
+      },
+      "devDependencies": {
+        "@sveltejs/adapter-auto": "^2.0.0",
+        "@sveltejs/adapter-static": "1.0.0-next.50",
+        "@sveltejs/kit": "^1.5.0",
+        "@tauri-apps/cli": "^1.2.3",
+        "@typescript-eslint/eslint-plugin": "^5.45.0",
+        "@typescript-eslint/parser": "^5.45.0",
+        "eslint": "^8.28.0",
+        "eslint-config-prettier": "^8.5.0",
+        "eslint-plugin-svelte3": "^4.0.0",
+        "prettier": "^2.8.0",
+        "prettier-plugin-svelte": "^2.8.1",
+        "svelte": "^3.54.0",
+        "svelte-check": "^3.0.1",
+        "tslib": "^2.4.1",
+        "typescript": "^5.0.0",
+        "vite": "^4.2.0"
+      },
+      "type": "module",
+      "dependencies": {
+        "@tauri-apps/api": "^1.2.0"
+      }
+    },
+    "prefix": "C:\\Users\\julia\\Documents\\REPOS\\_Uni\\BP\\ai-tester"
+  },
+  "2 debug pnpm:context": {
+    "currentLockfileExists": false,
+    "storeDir": "C:\\Users\\julia\\AppData\\Local\\pnpm\\store\\v3",
+    "virtualStoreDir": "C:\\Users\\julia\\Documents\\REPOS\\_Uni\\BP\\ai-tester\\node_modules\\.pnpm"
+  },
+  "3 info pnpm": {
+    "message": "Lockfile is up-to-date, resolution step is skipped",
+    "prefix": "C:\\Users\\julia\\Documents\\REPOS\\_Uni\\BP\\ai-tester"
+  },
+  "4 debug pnpm:stats": {
+    "prefix": "C:\\Users\\julia\\Documents\\REPOS\\_Uni\\BP\\ai-tester",
+    "removed": 0
+  },
+  "5 debug pnpm:stage": {
+    "prefix": "C:\\Users\\julia\\Documents\\REPOS\\_Uni\\BP\\ai-tester",
+    "stage": "importing_started"
+  },
+  "6 warn pnpm:install-check": {
+    "message": "Unsupported engine for /@sveltejs/kit/1.15.1_svelte@3.58.0+vite@4.2.1: wanted: {\"node\":\"^16.14 || >=18\"} (current: {\"node\":\"v14.19.2\",\"pnpm\":\"7.5.0\"})",
+    "prefix": "C:\\Users\\julia\\Documents\\REPOS\\_Uni\\BP\\ai-tester"
+  },
+  "7 error pnpm": {
+    "code": "ERR_PNPM_UNSUPPORTED_ENGINE",
+    "packageId": "/@sveltejs/kit/1.15.1_svelte@3.58.0+vite@4.2.1",
+    "wanted": {
+      "node": "^16.14 || >=18"
+    },
+    "current": {
+      "node": "v14.19.2",
+      "pnpm": "7.5.0"
+    },
+    "err": {
+      "name": "pnpm",
+      "message": "Unsupported engine for /@sveltejs/kit/1.15.1_svelte@3.58.0+vite@4.2.1: wanted: {\"node\":\"^16.14 || >=18\"} (current: {\"node\":\"v14.19.2\",\"pnpm\":\"7.5.0\"})",
+      "code": "ERR_PNPM_UNSUPPORTED_ENGINE",
+      "stack": "pnpm: Unsupported engine for /@sveltejs/kit/1.15.1_svelte@3.58.0+vite@4.2.1: wanted: {\"node\":\"^16.14 || >=18\"} (current: {\"node\":\"v14.19.2\",\"pnpm\":\"7.5.0\"})\n    at checkEngine (C:\\snapshot\\dist\\pnpm.cjs)\n    at checkPackage (C:\\snapshot\\dist\\pnpm.cjs)\n    at packageIsInstallable (C:\\snapshot\\dist\\pnpm.cjs)\n    at pkgAllDeps (C:\\snapshot\\dist\\pnpm.cjs)\n    at pickPkgsWithAllDeps (C:\\snapshot\\dist\\pnpm.cjs)\n    at filterByImportersAndEngine (C:\\snapshot\\dist\\pnpm.cjs)\n    at C:\\snapshot\\dist\\pnpm.cjs\n    at async _install (C:\\snapshot\\dist\\pnpm.cjs)\n    at async mutateModules (C:\\snapshot\\dist\\pnpm.cjs)\n    at async install (C:\\snapshot\\dist\\pnpm.cjs)"
+    }
+  }
+}
