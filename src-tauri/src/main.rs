@@ -21,7 +21,7 @@ fn main() {
       .body(Vec::new());
       if request.method() != "GET" { return res_not_img; }
       let uri = request.uri();
-      // uri is formated like this: "https://video./base64_encoded_path"
+      // uri is formated like this: "https://video.localhost/base64_encoded_path"
       let path = uri.split("/").last().unwrap();
       let path = general_purpose::STANDARD.decode(path.as_bytes()).unwrap();
       let path = String::from_utf8(path).unwrap();

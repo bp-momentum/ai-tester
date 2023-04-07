@@ -1,8 +1,12 @@
 <script lang="ts">
+	import { onDestroy } from "svelte";
 	import Button from "$lib/button.svelte";
   import { listen } from '@tauri-apps/api/event'
   import { open } from '@tauri-apps/api/dialog'
   import { inputType, jsonObject, videoPath, jsonValid } from "./stores/expectation";
+  import { getNotificationsContext } from 'svelte-notifications';
+
+  const { addNotification } = getNotificationsContext();
 
   const openVideo = async () => {
     const filePaths = await open({
@@ -19,13 +23,41 @@
       $videoPath = filePaths;
   };
 
-  listen('tauri://file-drop', (event) => {
+  const unlisten = listen('tauri://file-drop', async (event) => {
     if (!event.payload || !((event.payload as Array<string>).length > 0))
       return;
     const payload: Array<string> = event.payload as Array<string>;
+    if (payload.length !== 1) {
+      addNotification({
+        id: new Date().getTime(),
+        text: 'You can only drop one file at a time',
+        type: 'error',
+        position: 'bottom-right',
+        removeAfter: 5000
+      });
+      return;
+    }
+    let path = payload[0];
+    // check file extension
+    const allowedExtensions = ['mp4', 'mkv', 'avi', 'mov', 'webm', 'flv', 'wmv', 'mpg', 'mpeg'];
+    const extension = path.split('.').pop();
+    if (!extension || !allowedExtensions.includes(extension)) {
+      addNotification({
+        id: new Date().getTime(),
+        text: 'You can only drop video files',
+        type: 'error',
+        position: 'bottom-right',
+        removeAfter: 5000
+      });
+      return;
+    }
+      
     $videoPath = payload[0];
   });
 
+  onDestroy(async () => {
+    (await unlisten)();
+  });
 </script>
 
 <!-- This page will be used to either select a video or to input a json object -->
@@ -137,6 +169,7 @@
     color: #959595;
     height: 180px;
     cursor: pointer;
+    text-align: center;
   }
 
   #video {
