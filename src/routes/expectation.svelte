@@ -3,7 +3,7 @@
 	import Button from "$lib/button.svelte";
   import { listen } from '@tauri-apps/api/event'
   import { open } from '@tauri-apps/api/dialog'
-  import { inputType, jsonObject, videoPath, jsonValid } from "./stores/expectation";
+  import { inputType, jsonObject, videoPath, jsonValid } from "../lib/stores/expectation";
   import { getNotificationsContext } from 'svelte-notifications';
 
   const { addNotification } = getNotificationsContext();
@@ -51,7 +51,6 @@
       });
       return;
     }
-      
     $videoPath = payload[0];
   });
 
@@ -66,13 +65,14 @@
   {#if $videoPath !== "" || $jsonObject !== ""}
     <div id="buttonContainer">
       <Button 
-        on:click={() => {$videoPath = ""; $jsonObject = ""}}
-        style="background: #b00; margin: 0;"
+        onClick={() => {$videoPath = ""; $jsonObject = ""}}
+        style="margin: 0;"
+        type="negative"
       >
         Reset Input
       </Button>
       <Button 
-        on:click={() => {
+        onClick={() => {
           $jsonObject = "";
           $videoPath = "";
           $inputType = ($inputType === "video" ? "string" : "video");
@@ -90,6 +90,7 @@
 
   {#if $inputType === "video"}
     {#if $videoPath === ""}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div
       id="videoInput"
       on:click={openVideo}
@@ -123,7 +124,7 @@
 
   {#if $videoPath === "" && $jsonObject === ""}
     <Button 
-      on:click={() => {
+      onClick={() => {
         $jsonObject = "";
         $videoPath = "";
         $inputType = ($inputType === "video" ? "string" : "video");

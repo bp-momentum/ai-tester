@@ -2,16 +2,29 @@
   all(not(debug_assertions), target_os = "windows"),
   windows_subsystem = "windows"
 )]
+#![forbid(unsafe_code)]
 
-use std::io::Read;
+use std::{io::Read, sync::Mutex, thread::JoinHandle};
+use once_cell::sync::Lazy;
 use base64::{Engine as _, engine::general_purpose};
 
-use tauri::http::ResponseBuilder;
+use tauri::{http::ResponseBuilder, AppHandle};
 
 mod commands;
 use commands::*;
 
-static mut LANDMARKS: String = String::new();
+mod server;
+use server::*;
+
+mod socket;
+use socket::*;
+use tokio::sync::oneshot::Sender;
+
+mod events;
+
+static LANDMARKS: Lazy<Mutex<Option<String>>> = Lazy::new(|| Mutex::new(None));
+static APP_HANDLE: Lazy<Mutex<Option<AppHandle>>> = Lazy::new(|| Mutex::new(None));
+static SERVER_THREAD: Lazy<Mutex<Option<(JoinHandle<Result<(), Box<(dyn std::error::Error + Send + Sync + 'static)>>>,Sender<()>)>>> = Lazy::new(|| Mutex::new(None));
 
 fn main() {
   tauri::Builder::default()
@@ -22,12 +35,23 @@ fn main() {
       if request.method() != "GET" { return res_not_img; }
       let uri = request.uri();
       // uri is formated like this: "https://video.localhost/base64_encoded_path"
-      let path = uri.split("/").last().unwrap();
-      let path = general_purpose::STANDARD.decode(path.as_bytes()).unwrap();
-      let path = String::from_utf8(path).unwrap();
+      let Some(path) = uri.split("/").last() else {
+        return res_not_img;
+      };
+      let Ok(path) = general_purpose::STANDARD.decode(path.as_bytes()) else {
+        return res_not_img;
+      };
+      let Ok(path) = String::from_utf8(path) else {
+        return res_not_img;
+      };
       let path = std::path::Path::new(&path);
       if !path.exists() { return res_not_img; }
-      let ext = path.extension().unwrap().to_str().unwrap();
+      let Some(ext) = path.extension() else {
+        return res_not_img;
+      };
+      let Some(ext) = ext.to_str() else {
+        return res_not_img;
+      };
       let mime = match ext {
         "mp4" => "video/mp4",
         "webm" => "video/webm",
@@ -42,19 +66,40 @@ fn main() {
         "m4v" => "video/x-m4v",
         _ => return res_not_img,
       };
-      let mut file = std::fs::File::open(path).unwrap();
+      let Ok(mut file) = std::fs::File::open(path) else {
+        return res_not_img;
+      };
       let mut buf = Vec::new();
       if file.read_to_end(&mut buf).is_err() { return res_not_img; }
       let res = ResponseBuilder::new()
       .status(200)
       .header("Content-Type", mime)
+      .header("Access-Control-Allow-Origin", "*")
+      .header("Access-Control-Allow-Headers", "referer, range, accept-encoding, x-requested-with")
       .body(buf);
       res
     })
     .invoke_handler(tauri::generate_handler![
       set_expectation_landmarks, 
-      set_expectation_video
+      set_expectation_video,
+      can_run_tests,
+      connect_ws,
+      send_image,
+      end_repetition,
+      end_set,
+      spawn_server,
     ])
+    .setup(|app| {
+      let handle = app.handle();
+      *APP_HANDLE.lock().unwrap() = Some(handle.clone());
+      
+      let (tx, rx) = tokio::sync::oneshot::channel::<()>();
+      *SERVER_THREAD.lock().unwrap() = Some((std::thread::spawn(|| {
+        spawn_tokio(3000, rx)
+      }), tx));
+
+      Ok(())
+    })
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

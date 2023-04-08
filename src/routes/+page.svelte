@@ -1,19 +1,32 @@
 <script>
-  import { SvelteComponent } from 'svelte';
   import Expectation from './expectation.svelte';
   import Tests from './tests.svelte';
   import Notifications from 'svelte-notifications';
+	import Settings from './settings.svelte';
+	import { running } from '$lib/stores/tests';
 
   export let menu = 0;
 </script>
 
 <Notifications>
   <div id="navbar">
-    <div id="navbar-item" on:click={() => (menu = 0)}>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div id="navbar-item" class:disabled={$running} on:click={() => {
+      if (!$running) menu = 0
+    }}>
       <h2 class:selected={menu === 0}>Expectation</h2>
     </div> 
-    <div id="navbar-item" on:click={() => (menu = 1)}>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div id="navbar-item" class:disabled={$running} on:click={() => {
+      if (!$running) menu = 1
+    }}>
       <h2 class:selected={menu === 1}>Tests</h2>
+    </div>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div id="navbar-item" class:disabled={$running} on:click={() => {
+      if (!$running) menu = 2
+    }}>
+      <h2 class:selected={menu === 2}>Settings</h2>
     </div>
   </div>
 
@@ -22,6 +35,8 @@
       <Expectation />
     {:else if menu === 1}
       <Tests />
+    {:else if menu === 2}
+      <Settings />
     {:else}
       <!-- use an empty slot to force a 404 -->
       <slot /> 
@@ -59,6 +74,14 @@
     padding: 10px;
     cursor: pointer;
     border-radius: 5px;
+  }
+
+  #navbar-item.disabled {
+    cursor: not-allowed;
+  }
+
+  #navbar-item.disabled:hover {
+    background-color: unset;
   }
 
   #navbar-item:hover {

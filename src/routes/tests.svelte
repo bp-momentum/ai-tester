@@ -1,17 +1,28 @@
 <script lang="ts">
   import { open } from '@tauri-apps/api/dialog';
-  import { testPaths } from './stores/tests';
+  import { testPaths, type Test, running } from '$lib/stores/tests';
 	import Button from '$lib/button.svelte';
   import { getNotificationsContext } from 'svelte-notifications';
 	import { listen } from '@tauri-apps/api/event';
 	import { onDestroy } from 'svelte';
+	import { invoke } from '@tauri-apps/api/tauri';
+	import DeleteIcon from '$lib/icons/delete-icon.svelte';
+	import PlayIcon from '$lib/icons/play-icon.svelte';
+  import { runTest } from '$lib/socket';
+	import { aiHost, aiPort } from '$lib/stores/settings';
+	import HaltIcon from '$lib/icons/halt-icon.svelte';
+	import SpinnerIcon from '$lib/icons/spinner-icon.svelte';
 
   const { addNotification } = getNotificationsContext();
 
-  String.prototype.rsplit = function(sep: string, maxsplit: number) {
-    var split = this.split(sep);
+  const rsplit = (inp: string, sep: string, maxsplit: number) => {
+    var split = inp.split(sep);
     return maxsplit ? [ split.slice(0, -maxsplit).join(sep) ].concat(split.slice(-maxsplit)) : split;
   }
+
+  let canRunTests: boolean = false;
+  invoke('can_run_tests')
+    .then(can => {typeof can === "boolean" && (canRunTests = can)});
 
   const openVideos = async () => {
     const filePaths = await open({
@@ -24,9 +35,17 @@
         }
       ]
     });
-    if (filePaths && typeof filePaths === 'object' && filePaths.length > 0)
-      $testPaths = [...new Set($testPaths.concat(filePaths))];
-    console.log($testPaths)
+    if (filePaths && typeof filePaths === 'object' && filePaths.length > 0) {
+      filePaths.forEach(element => {
+        if (!$testPaths.filter(tf => tf.path === element).length)
+          $testPaths.push({
+            name: rsplit(element.replaceAll("\\", "/"), '/', 1)[1],
+            path: element,
+            running: false,
+          });
+      });
+      testPaths.update(tests => tests);
+    }
   };
 
   const unlisten = listen('tauri://file-drop', async (event) => {
@@ -54,8 +73,17 @@
         removeAfter: 5000
       });
     }
-    if (legalFiles.length > 0)
-      $testPaths = [...new Set($testPaths.concat(legalFiles))];
+    if (legalFiles.length > 0) {
+      legalFiles.forEach(element => {
+        if (!$testPaths.filter(tf => tf.path === element).length)
+        $testPaths.push({
+            name: rsplit(element.replaceAll("\\", "/"), '/', 1)[1],
+            path: element,
+            running: false,
+          });
+      });
+    }
+    testPaths.update(tests => tests);
   });
 
   onDestroy(async () => {
@@ -67,41 +95,80 @@
   {#each $testPaths as tf}
     <div class="testCase">
       <div class="header">
-        <p class="title">{tf.replaceAll("\\", "/").rsplit("/", 1)[1]}</p>
-        <Button 
-          style="background: #0b0; margin: 0; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center;"
-          on:click={() => addNotification({
-            id: new Date().getTime(),
-            text: 'Not implemented yet',
-            type: 'warning',
-            position: 'bottom-right',
-            removeAfter: 5000
-          })}
+        <p class="title">{tf.name}</p>
+        <Button
+          style="margin: 0; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center;"
+          onClick={() => {
+            if (tf.videoElem && tf.liveFeedbackElem && tf.persistentFeedbackElem) {
+              $running = true;
+              tf.running = true;
+              tf.token = {};
+              runTest(
+                tf.videoElem,
+                tf.liveFeedbackElem,
+                tf.persistentFeedbackElem,
+                $aiHost,
+                $aiPort,
+                10,
+                tf.token
+              ).then(() => {
+                $running = false;
+                tf.running = false;
+              });
+            }
+          }}
+          type="positive"
+          disabled={!canRunTests || $running}
         >
-          ▶
+          {#if tf.running}  
+            <SpinnerIcon color="white" />
+          {:else}
+            <PlayIcon color="white" size={15}/>
+          {/if}
         </Button>
+        {#if !$running}
         <Button 
-          style="background: #b00; margin: 0; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center;"
-          on:click={() => $testPaths = $testPaths.filter(t => t !== tf)}
+          style="margin: 0; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center;"
+          onClick={() => $testPaths = $testPaths.filter(t => t !== tf)}
+          type="negative"
         >
-          🗑️
+          <DeleteIcon color="white"/>
         </Button>
+        {:else}
+        <Button 
+          style="margin: 0; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center;"
+          onClick={() => {
+            if (tf.videoElem && tf.liveFeedbackElem && tf.persistentFeedbackElem) {
+              if (tf.token && tf.token.cancel)
+                tf.token.cancel();
+            }
+          }}
+          type="negative"
+          disabled={!tf.running}
+        >
+          <HaltIcon color="white" size={30}/>
+        </Button>
+        {/if}
       </div>
       <div class="content">
+        <!-- svelte-ignore a11y-media-has-caption -->
         <video 
           id="video"
           controls
           controlslist="nodownload nofullscreen noremoteplayback noplaybackrate"
           disablepictureinpicture
           disableremoteplayback
-          src={"https://video.localhost/" + btoa(tf)}
+          src={"https://video.localhost/" + btoa(tf.path)}
+          crossOrigin="anonymous"
+          bind:this={tf.videoElem}
         />
-        <textarea readonly>Live Feedback</textarea>
-        <textarea readonly>Persistent Feedback</textarea>
+        <textarea readonly bind:this={tf.liveFeedbackElem} placeholder="Live Feedback"></textarea>
+        <textarea readonly bind:this={tf.persistentFeedbackElem} placeholder="Persistent Feedback"></textarea>
       </div>
     </div>
   {/each}
 
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div 
     id="addButton" 
     on:click={openVideos}

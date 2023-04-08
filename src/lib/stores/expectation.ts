@@ -1,10 +1,11 @@
 import { writable } from 'svelte/store';
 import { invoke } from '@tauri-apps/api/tauri'
 
-export const inputType = writable<"video" | "string">("video");
+export const inputType = writable<"video" | "string">("string");
 export const videoPath = writable<string>("");
 export const jsonObject = writable<string>("");
 export const jsonValid = writable<boolean>(true);
+export const landmarks = writable<Array<Array<object>>|undefined>();
 
 jsonObject.subscribe((value) => {
   let $inputType;

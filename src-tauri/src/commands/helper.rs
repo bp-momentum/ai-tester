@@ -1,8 +1,7 @@
 use jsonschema::{JSONSchema};
-use serde_json::json;
+use serde_json::{json, Value};
 
 pub(crate) fn validate_landmarks(landmarks: &str) -> bool {
-  if landmarks.trim().is_empty() { return true; }
   let schema = json!({
     "type": "array",
     "items": {
@@ -16,18 +15,18 @@ pub(crate) fn validate_landmarks(landmarks: &str) -> bool {
           "visibility": {"type": "number"}
         },
         "required": ["x", "y", "z", "visibility"]
-      }
-    }
+      },
+      "minItems": 33,
+      "maxItems": 33
+    },
+    "minItems": 1
   });
-  let schema = JSONSchema::compile(&schema);
-  if schema.is_err() {
+  let Ok(schema) = JSONSchema::compile(&schema) else {
     return false;
-  }
-  let schema = schema.unwrap();
-  let data = serde_json::from_str(landmarks);
-  if data.is_err() {
+  };
+  let Ok(data) = serde_json::from_str::<Value>(landmarks) else {
     return false;
-  }
-  let data = data.unwrap();
+  };
+  let data = data;
   schema.is_valid(&data)
 }
