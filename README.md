@@ -24,7 +24,7 @@ First, you need to start the AI. It needs to be accessible via the network. You 
 
 ### ⚙️ Configuration
 
-Once the AI is running, you can start the Tester. In the settings, you can set the IP and port of the AI. You also need to set the Backend Mock port to match the port that was set in the AI. The Backend Mock port is the port that the Tester will use to communicate with the AI. The Backend Mock port can be set to any port that is not used by any other application. The default port is `3000`.
+Once the AI is running, you can start the Tester. In the settings, you can set the IP and port of the AI. You also need to set the Backend Mock port to match the port that was set in the AI. The Backend Mock port is the port that the Tester will use to communicate with the AI. The Backend Mock port can be set to any port that is not used by any other application. The default port is `3000`. If the port is not configured correctly, the AI will raise errors and the Tester will hang until a test is canceled.
 
 ### 🧪 Testing
 
@@ -34,10 +34,14 @@ Next under the `Test` tab, you can select multiple videos that will be processed
 
 ## 📝 Roadmap
 
-- [x] Make Readme (fancy)
-- [ ] Write CI/CD
-- [ ] Handle Socket On Cancel
-- [ ] Handle AI Errors (maybe)
+- [x] Create Basic Project
+- [x] Create Readme
+- [x] Write CI/CD
+- [x] Handle AI Errors
+- [ ] Persist Settings
+- [ ] Persist User Input
+- [ ] Persist Test Results
+- [ ] Add Dark Mode
 
 ## 🗒️ License
 

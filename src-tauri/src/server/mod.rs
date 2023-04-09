@@ -48,7 +48,7 @@ async fn feedback(_req: Request<Body>) -> Result<Response<Body>, Infallible> {
     return Ok(res);
   };
 
-  send_persistent_feedback(&handle.as_ref().unwrap(), json);
+  send_persistent_feedback(handle.as_ref().unwrap(), json);
   let response = json!({
     "success": true,
     "description": "Feedback received"

@@ -22,9 +22,12 @@ use tokio::sync::oneshot::Sender;
 
 mod events;
 
+type ServerThreadResult = std::result::Result<(), Box<dyn std::error::Error + Send + Sync + 'static>>;
+type ServerThreadTuple = (JoinHandle<ServerThreadResult>,Sender<()>);
+
 static LANDMARKS: Lazy<Mutex<Option<String>>> = Lazy::new(|| Mutex::new(None));
 static APP_HANDLE: Lazy<Mutex<Option<AppHandle>>> = Lazy::new(|| Mutex::new(None));
-static SERVER_THREAD: Lazy<Mutex<Option<(JoinHandle<Result<(), Box<(dyn std::error::Error + Send + Sync + 'static)>>>,Sender<()>)>>> = Lazy::new(|| Mutex::new(None));
+static SERVER_THREAD: Lazy<Mutex<Option<ServerThreadTuple>>> = Lazy::new(|| Mutex::new(None));
 
 fn main() {
   tauri::Builder::default()
@@ -34,8 +37,8 @@ fn main() {
       .body(Vec::new());
       if request.method() != "GET" { return res_not_img; }
       let uri = request.uri();
-      // uri is formated like this: "https://video.localhost/base64_encoded_path"
-      let Some(path) = uri.split("/").last() else {
+      // uri is formatted like this: "https://video.localhost/base64_encoded_path"
+      let Some(path) = uri.split('/').last() else {
         return res_not_img;
       };
       let Ok(path) = general_purpose::STANDARD.decode(path.as_bytes()) else {
@@ -88,10 +91,11 @@ fn main() {
       end_repetition,
       end_set,
       spawn_server,
+      disconnect_ws,
     ])
     .setup(|app| {
       let handle = app.handle();
-      *APP_HANDLE.lock().unwrap() = Some(handle.clone());
+      *APP_HANDLE.lock().unwrap() = Some(handle);
       
       let (tx, rx) = tokio::sync::oneshot::channel::<()>();
       *SERVER_THREAD.lock().unwrap() = Some((std::thread::spawn(|| {
@@ -101,5 +105,5 @@ fn main() {
       Ok(())
     })
     .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+    .expect("Error while running tauri application");
 }

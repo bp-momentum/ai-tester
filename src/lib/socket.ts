@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { setIntervalX } from "./helper";
 
 export const testCleanup = async (
   unlisten: Promise<UnlistenFn>[],
@@ -29,7 +30,11 @@ export const runTest = async (
   let res: (arg0: boolean) => void;
   const running = new Promise<boolean>((resolve,) => {
     res = resolve;
-    token.cancel = () => {
+    token.cancel = async () => {
+      await invoke("disconnect_ws", {
+        "uuid": uuid
+      });
+
       testCleanup(unlisten, videoElem);
 
       res(false);
@@ -43,10 +48,6 @@ export const runTest = async (
 
   liveFeedbackElem.value = "";
   persistentFeedbackElem.value = "";
-
-  invoke("connect_ws", {
-    "url": `http://${aiHost}:${aiPort}`,
-  })
 
   const unlisten: Promise<UnlistenFn>[] = [];
 
@@ -68,8 +69,7 @@ export const runTest = async (
     videoElem.play();
 
     while (!videoElem.paused && !videoElem.ended && videoElem.currentTime < videoElem.duration) {
-      for (let i = 0; i < nLandmarks; i++) {
-        await new Promise(r => setTimeout(r, 100));
+      await setIntervalX(() => {
         // convert video frame to image blob
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth;
@@ -78,12 +78,21 @@ export const runTest = async (
         // send image blob to ai
         invoke("send_image", {
           "image": canvas.toDataURL('image/jpeg', 0.5),
-        })
-      }
-      invoke("end_repetition", {});
+          "uuid": uuid
+        });
+      }, 100, nLandmarks);
+      await invoke("end_repetition", {
+        "uuid": uuid
+      });
     }
-    invoke("end_set", {});
+    await invoke("end_set", {
+      "uuid": uuid
+    });
   }));
+
+  const uuid = await invoke("connect_ws", {
+    "url": `http://${aiHost}:${aiPort}`,
+  });
 
   return running;
 }
