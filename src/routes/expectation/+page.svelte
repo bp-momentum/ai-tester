@@ -3,7 +3,7 @@
 	import Button from "$lib/button.svelte";
   import { listen } from '@tauri-apps/api/event'
   import { open } from '@tauri-apps/api/dialog'
-  import { inputType, jsonObject, videoPath, jsonValid } from "../lib/stores/expectation";
+  import { inputType, jsonObject, videoPath, jsonValid } from "$lib/stores/expectation";
   import { getNotificationsContext } from 'svelte-notifications';
 
   const { addNotification } = getNotificationsContext();
@@ -140,7 +140,7 @@
 
 </div>
 
-<style>
+<style lang="scss">
   #layout {
     display: flex;
     flex-direction: column;
@@ -187,9 +187,9 @@
     border-radius: 5px;
     font-size: medium;
     font-family: 'Fira Code', monospace;
-  }
 
-  #textInput:not(.valid) {
-    color: #f00;
+    &:not(.valid) {
+      color: #f00;
+    }
   }
 </style>

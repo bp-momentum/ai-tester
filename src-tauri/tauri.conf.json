@@ -7,8 +7,8 @@
     "distDir": "../build"
   },
   "package": {
-    "productName": "ai-tester",
-    "version": "0.1.0"
+    "productName": "Momentum AI Tester",
+    "version": "0.3.0"
   },
   "tauri": {
     "allowlist": {

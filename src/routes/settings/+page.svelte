@@ -6,7 +6,7 @@
 
 <div id="layout">
   <div id="table">
-    <span class="header">AI Address</span>
+    <span class="header" data-tooltip="Where the AI is accessible.">AI Address</span>
     <span>
       <input type="text" bind:value={$aiHost} />
       :
@@ -16,7 +16,7 @@
       />
     </span>
 
-    <span class="header">Backend Mock</span>
+    <span class="header" data-tooltip="Where the Backend Mock will be hosted.">Backend Mock</span>
     <span>
       <input type="text" value="0.0.0.0" disabled />
       :
@@ -28,7 +28,7 @@
   </div>
 </div>
 
-<style>
+<style lang="scss">
   #layout {
     display: flex;
     flex-direction: column;
@@ -43,21 +43,21 @@
     row-gap: 10px;
     column-gap: 20px;
     align-items: center;
-  }
+    
+    span {
+      white-space: nowrap;
 
-  #table span {
-    white-space: nowrap;
-  }
+      &.header {
+        font-size: medium;
+        font-weight: 500;
+      }
+    }
 
-  #table span.header {
-    font-size: medium;
-    font-weight: 500;
-  }
-
-  #table input {
-    box-sizing: border-box;
-    border-radius: 5px;
-    font-family: 'Fira Code', monospace;
-    padding: 2px;
+    input {
+      box-sizing: border-box;
+      border-radius: 5px;
+      font-family: 'Fira Code', monospace;
+      padding: 2px;
+    }
   }
 </style>

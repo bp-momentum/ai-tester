@@ -25,10 +25,9 @@
   </slot>
 </div>
 
-<style>
+<style  lang="scss">
   .button {
     background-color: #f1f1f1;
-    border: 1px solid #e1e1e1;
     border-radius: 5px;
     padding: 10px;
     margin: 10px;
@@ -36,18 +35,23 @@
     display: inline-block;
     background-color: cornflowerblue;
     color: white;
-  }
+    border: 1px solid #404040;
 
-  .button.disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
+    @media (prefers-color-scheme: dark) {
+      border: 1px solid #e1e1e1;
+    }
 
-  .button.positive {
-    background-color: #4caf50;
-  }
+    &.disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
 
-  .button.negative {
-    background-color: #f44336;
+    &.positive {
+      background-color: #4caf50;
+    }
+
+    &.negative {
+      background-color: #f44336;
+    }
   }
 </style>
