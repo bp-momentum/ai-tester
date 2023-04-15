@@ -8,6 +8,7 @@
 	import HaltIcon from '$lib/icons/halt-icon.svelte';
 	import SpinnerIcon from '$lib/icons/spinner-icon.svelte';
   import { testPaths, running } from '$lib/stores/tests';
+	import { convertFileSrc } from '@tauri-apps/api/tauri';
   
   export let tf: Test;
   export let cancelRunningTest: (() => void) | undefined;
@@ -83,7 +84,7 @@
       controlslist="nodownload nofullscreen noremoteplayback noplaybackrate"
       disablepictureinpicture
       disableremoteplayback
-      src={"https://video.localhost/" + btoa(tf.path)}
+      src={convertFileSrc(tf.path)}
       crossOrigin="anonymous"
       bind:this={tf.videoElem}
     />

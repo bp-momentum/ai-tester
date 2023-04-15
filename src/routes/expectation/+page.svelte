@@ -5,6 +5,7 @@
   import { open } from '@tauri-apps/api/dialog'
   import { inputType, jsonObject, videoPath, jsonValid } from "$lib/stores/expectation";
   import { getNotificationsContext } from 'svelte-notifications';
+	import { convertFileSrc } from "@tauri-apps/api/tauri";
 
   const { addNotification } = getNotificationsContext();
 
@@ -107,7 +108,7 @@
         controlslist="nodownload nofullscreen noremoteplayback noplaybackrate"
         disablepictureinpicture
         disableremoteplayback
-        src={"https://video.localhost/" + btoa($videoPath)}
+        src={convertFileSrc($videoPath)}
       />
       <p>
         <b>Warning:</b> Not yet implemented!

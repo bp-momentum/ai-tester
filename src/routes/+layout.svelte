@@ -1,4 +1,5 @@
 <script lang="ts">
+  import '../app.css';
 
 	import Notifications from "svelte-notifications";
   import { running } from "$lib/stores/tests";
