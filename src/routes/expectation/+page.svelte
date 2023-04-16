@@ -5,7 +5,7 @@
   import { open } from '@tauri-apps/api/dialog'
   import { inputType, jsonObject, videoPath, jsonValid } from "$lib/stores/expectation";
   import { getNotificationsContext } from 'svelte-notifications';
-	import { convertFileSrc } from "@tauri-apps/api/tauri";
+	import { convertFileSrc, invoke } from "@tauri-apps/api/tauri";
 
   const { addNotification } = getNotificationsContext();
 
@@ -53,6 +53,12 @@
       return;
     }
     $videoPath = payload[0];
+  });
+
+  invoke("get_landmarks").then((res) => {
+    if (res) {
+      console.log(res);
+    }
   });
 
   onDestroy(async () => {
