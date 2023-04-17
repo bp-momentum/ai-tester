@@ -13,4 +13,3 @@ export interface Test {
 };
 
 export const testPaths = writable<Test[]>([]);
-export const running = writable<boolean>(false);

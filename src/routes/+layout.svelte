@@ -1,9 +1,10 @@
 <script lang="ts">
+  import '../app.css';
 
 	import Notifications from "svelte-notifications";
-  import { running } from "$lib/stores/tests";
 
   import { page } from '$app/stores';
+	import { blockButtons } from '$lib/stores/global';
 
   let path: String;
 
@@ -15,25 +16,25 @@
   <div id="navbar">
     <a 
       id="navbar-item"
-      aria-disabled={$running}
+      aria-disabled={$blockButtons}
       href="/expectation"
-      on:click={e => {if ($running) e.preventDefault()}}
+      on:click={e => {if ($blockButtons) e.preventDefault()}}
     >
       <h2 class:selected={path === "/expectation"}>Expectation</h2>
     </a> 
     <a
       id="navbar-item"
-      aria-disabled={$running}
+      aria-disabled={$blockButtons}
       href="/tests"
-      on:click={e => {if ($running) e.preventDefault()}}
+      on:click={e => {if ($blockButtons) e.preventDefault()}}
     >
       <h2 class:selected={path === "/tests"}>Tests</h2>
     </a>
     <a
       id="navbar-item"
-      aria-disabled={$running}
+      aria-disabled={$blockButtons}
       href="/settings"
-      on:click={e => {if ($running) e.preventDefault()}}
+      on:click={e => {if ($blockButtons) e.preventDefault()}}
     >
       <h2 class:selected={path === "/settings"}>Settings</h2>
     </a>

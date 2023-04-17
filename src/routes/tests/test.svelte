@@ -7,7 +7,9 @@
 	import { aiHost, aiPort } from '$lib/stores/settings';
 	import HaltIcon from '$lib/icons/halt-icon.svelte';
 	import SpinnerIcon from '$lib/icons/spinner-icon.svelte';
-  import { testPaths, running } from '$lib/stores/tests';
+  import { testPaths } from '$lib/stores/tests';
+	import { convertFileSrc } from '@tauri-apps/api/tauri';
+	import { blockButtons } from '$lib/stores/global';
   
   export let tf: Test;
   export let cancelRunningTest: (() => void) | undefined;
@@ -21,7 +23,7 @@
       style="margin: 0; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center;"
       onClick={() => {
         if (tf.videoElem && tf.liveFeedbackElem && tf.persistentFeedbackElem) {
-          $running = true;
+          $blockButtons = true;
           tf.running = true;
           tf.token = {};
           cancelRunningTest = () => {
@@ -37,13 +39,13 @@
             10,
             tf.token
           ).then(() => {
-            $running = false;
+            $blockButtons = false;
             tf.running = false;
           });
         }
       }}
       type="positive"
-      disabled={!canRunTests || $running}
+      disabled={!canRunTests || $blockButtons}
     >
       {#if tf.running}  
         <SpinnerIcon color="white" />
@@ -51,7 +53,7 @@
         <PlayIcon color="white" size={15}/>
       {/if}
     </Button>
-    {#if !$running}
+    {#if !$blockButtons}
     <Button 
       style="margin: 0; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center;"
       onClick={() => $testPaths = $testPaths.filter(t => t !== tf)}
@@ -83,7 +85,7 @@
       controlslist="nodownload nofullscreen noremoteplayback noplaybackrate"
       disablepictureinpicture
       disableremoteplayback
-      src={"https://video.localhost/" + btoa(tf.path)}
+      src={convertFileSrc(tf.path)}
       crossOrigin="anonymous"
       bind:this={tf.videoElem}
     />
