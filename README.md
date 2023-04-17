@@ -22,6 +22,8 @@ Go to the [releases](https://github.com/bp-momentum/ai-tester/releases) page and
 
 First, you need to start the AI. It needs to be accessible via the network. You can do this by running the AI in a Docker container and exposing the port. You can also run the AI locally. In both cases the Tester and the AI need to be on the same network and mutually accessible via the network - easiest way is to use the same machine. The `BACKEND_URL` environment variable needs to be set to the `localhost` and the port to a port that will later be used by the Tester. The port can be set in the settings of the Tester.
 
+> :warning: **When using Video Expectation**: You need to have ffmpeg installed and available in the path.
+
 ### ⚙️ Configuration
 
 Once the AI is running, you can start the Tester. In the settings, you can set the IP and port of the AI. You also need to set the Backend Mock port to match the port that was set in the AI. The Backend Mock port is the port that the Tester will use to communicate with the AI. The Backend Mock port can be set to any port that is not used by any other application. The default port is `3000`. If the port is not configured correctly, the AI will raise errors and the Tester will hang until a test is canceled.
@@ -38,10 +40,10 @@ Next under the `Test` tab, you can select multiple videos that will be processed
 - [x] Create Readme
 - [x] Write CI/CD
 - [x] Handle AI Errors
+- [x] Add Dark Mode
 - [ ] Persist Settings
 - [ ] Persist User Input
 - [ ] Persist Test Results
-- [ ] Add Dark Mode
 
 ## 🗒️ License
 

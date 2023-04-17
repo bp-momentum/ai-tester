@@ -41,6 +41,7 @@ fn main() {
       spawn_server,
       disconnect_ws,
       get_landmarks,
+      unset_expectation,
     ])
     .setup(|app| {
       let handle = app.handle();
