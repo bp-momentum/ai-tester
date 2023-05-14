@@ -1,38 +1,41 @@
-<script>
-  import { videoPath } from "$lib/stores/expectation";
+<script lang="ts">
+  import { FilesetResolver, PoseLandmarker } from "@mediapipe/tasks-vision";
+  import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
+
+  import { videoJson, videoJustSet, videoPath, videoValid } from "$lib/stores/expectation";
   import { open } from '@tauri-apps/api/dialog'
 	import { convertFileSrc } from "@tauri-apps/api/tauri";
   
-  import { listen } from '@tauri-apps/api/event'
-	import { onDestroy } from "svelte";
   import { blockButtons } from "$lib/stores/global"; 
 
   import { getNotificationsContext } from 'svelte-notifications';
+	import { onDestroy } from "svelte";
+
   const { addNotification } = getNotificationsContext();
 
-  const unlisten = [listen("landmarks_extracted", () => {
-    addNotification({
-      id: new Date().getTime(),
-      text: 'Landmarks extracted!',
-      type: 'success',
-      position: 'bottom-right',
-      removeAfter: 5000
-    });
-
+  const unlisten = videoValid.subscribe((valid) => {
+    if (valid) {
+      addNotification({
+        id: new Date().getTime(),
+        text: 'Video processed',
+        type: 'success',
+        position: 'bottom-right',
+        removeAfter: 5000
+      });
+    } else if (valid === false) {
+      $videoPath = "";
+      $videoJson = "";
+      addNotification({
+        id: new Date().getTime(),
+        text: 'Could not process video',
+        type: 'error',
+        position: 'bottom-right',
+        removeAfter: 5000
+      });
+    }
+    $videoValid = undefined;
     $blockButtons = false;
-  }),
-  listen("landmarks_extraction_failed", () => {
-    addNotification({
-      id: new Date().getTime(),
-      text: 'Landmarks extraction failed! Try using a different video.',
-      type: 'error',
-      position: 'bottom-right',
-      removeAfter: 5000
-    });
-
-    $blockButtons = false;
-    $videoPath = "";
-  })];
+  });
 
   const openVideo = async () => {
     const filePaths = await open({
@@ -49,8 +52,102 @@
       $videoPath = filePaths;
   };
 
-  onDestroy(async () => {
-    unlisten.forEach(async unlisten => (await unlisten)());
+  const debounce = (fn: () => void, ms: number) => {
+    let timeoutId: number;
+    return () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(fn, ms);
+    };
+  };
+
+  const debouncedNoLandmarkWarning = debounce(() => {
+    addNotification({
+      id: new Date().getTime(),
+      text: 'No landmarks found',
+      type: 'warning',
+      position: 'bottom-right',
+      removeAfter: 5000
+    });
+  }, 1000);
+
+  const processVideo = async (e: Event) => {
+    if (!$videoJustSet) return;
+    $videoJustSet = false;
+
+    const video = (e.target as HTMLVideoElement);
+    if (!video) return;
+
+    $blockButtons = true;
+
+    const vision = await FilesetResolver.forVisionTasks(
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+    );
+    const poseLandmarker = await PoseLandmarker.createFromOptions(
+      vision,
+    {
+      baseOptions: {
+        modelAssetPath: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",
+        delegate: "GPU"
+      },
+      runningMode: "IMAGE",
+      minPoseDetectionConfidence: 0.5,
+      minPosePresenceConfidence: 0.5,
+      minTrackingConfidence: 0.5,
+    });
+
+    video.pause();
+    video.currentTime = 0;
+    // step through the video in 10 fps steps
+    const fps = 10;
+    const step = Math.round(video.duration * fps);
+
+    const landMarkList: NormalizedLandmark[][] = new Array<NormalizedLandmark[]>(step);
+
+    let sum = 0;
+
+    for (let i = 0; i < step; i++) {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const context = canvas.getContext('2d');
+      if (!context) {
+        addNotification({
+          id: new Date().getTime(),
+          text: 'Could not process video',
+          type: 'error',
+          position: 'bottom-right',
+          removeAfter: 5000
+        });
+
+        $blockButtons = false;
+        $videoPath = "";
+        return;
+      }
+
+      video.currentTime = i / fps;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      poseLandmarker.detect(canvas, (result) => {
+        if (result.landmarks[0] === undefined) {
+          debouncedNoLandmarkWarning();
+        }
+
+        landMarkList[i] = result.landmarks[0];
+        sum += 1;
+      });
+    }
+
+    poseLandmarker.close();
+
+    // wait for all frames to be processed
+    while (sum != step) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
+    $videoJson = JSON.stringify(landMarkList);
+  }
+
+  onDestroy(() => {
+    unlisten();
   });
 </script>
 
@@ -73,6 +170,8 @@
     disablepictureinpicture
     disableremoteplayback
     src={convertFileSrc($videoPath)}
+    crossOrigin="anonymous"
+    on:loadeddata={processVideo}
   />
 {/if}
 

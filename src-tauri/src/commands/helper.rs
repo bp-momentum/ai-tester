@@ -14,7 +14,7 @@ pub(crate) fn validate_landmarks(landmarks: &str) -> bool {
           "z": {"type": "number"},
           "visibility": {"type": "number"}
         },
-        "required": ["x", "y", "z", "visibility"]
+        "required": ["x", "y", "z"]
       },
       "minItems": 33,
       "maxItems": 33

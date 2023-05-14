@@ -31,8 +31,7 @@ static SERVER_THREAD: Lazy<Mutex<Option<ServerThreadTuple>>> = Lazy::new(|| Mute
 fn main() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
-      set_expectation_landmarks, 
-      set_expectation_video,
+      set_expectation_landmarks,
       can_run_tests,
       connect_ws,
       send_image,
