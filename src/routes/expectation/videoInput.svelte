@@ -78,6 +78,9 @@
 
     $blockButtons = true;
 
+    // NOTE: this is a workaround for some race condition
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     const vision = await FilesetResolver.forVisionTasks(
       "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
     );
@@ -170,7 +173,7 @@
     disableremoteplayback
     src={convertFileSrc($videoPath)}
     crossOrigin="anonymous"
-    on:loadeddata={processVideo}
+    on:canplaythrough={processVideo}
   />
 {/if}
 
