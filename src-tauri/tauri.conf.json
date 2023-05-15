@@ -57,7 +57,7 @@
       }
     },
     "security": {
-      "csp": "default-src 'self' tauri: asset: https://asset.localhost; img-src 'self' asset: https://asset.localhost; media-src 'self' asset: https://asset.localhost video://localhost; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'unsafe-inline' 'self'; font-src 'self' https://fonts.gstatic.com"
+      "csp": "default-src 'self' tauri: asset: https://asset.localhost; img-src 'self' asset: https://asset.localhost; media-src 'self' asset: https://asset.localhost video://localhost; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'unsafe-inline' 'self'; font-src 'self' https://fonts.gstatic.com; script-src-elem 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://cdn.jsdelivr.net https://storage.googleapis.com; script-src 'self' 'unsafe-eval'"
     },
     "updater": {
       "active": false

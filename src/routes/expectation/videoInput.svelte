@@ -135,12 +135,12 @@
       });
     }
 
-    poseLandmarker.close();
-
     // wait for all frames to be processed
-    while (sum != step) {
+    while (sum < step) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
+    
+    poseLandmarker.close();
 
     $videoJson = landMarkList;
   }
