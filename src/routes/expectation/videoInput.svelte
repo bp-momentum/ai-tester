@@ -24,7 +24,6 @@
       });
     } else if (valid === false) {
       $videoPath = "";
-      $videoJson = "";
       addNotification({
         id: new Date().getTime(),
         text: 'Could not process video',
@@ -143,7 +142,7 @@
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    $videoJson = JSON.stringify(landMarkList);
+    $videoJson = landMarkList;
   }
 
   onDestroy(() => {

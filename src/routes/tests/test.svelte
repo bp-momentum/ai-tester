@@ -11,6 +11,10 @@
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import { blockButtons } from '$lib/stores/global';
   
+  import { videoJson } from '$lib/stores/expectation';
+
+  const frames_per_repetition = $videoJson?.length ?? 0;
+
   export let tf: Test;
   export let cancelRunningTest: (() => void) | undefined;
   export let canRunTests: boolean;
@@ -36,7 +40,7 @@
             tf.persistentFeedbackElem,
             $aiHost,
             $aiPort,
-            10,
+            frames_per_repetition,
             tf.token
           ).then(() => {
             $blockButtons = false;

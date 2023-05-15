@@ -22,7 +22,7 @@ export const runTest = async (
   persistentFeedbackElem: HTMLTextAreaElement,
   aiHost: string,
   aiPort: string,
-  nLandmarks: number,
+  framesPerRep: number,
   token: {
     cancel?: () => void;
   },
@@ -65,12 +65,12 @@ export const runTest = async (
   }));
 
   unlisten.push(listen("ws_connected", async () => {
-    // start video
-    videoElem.play();
+    const fps = 10;
+    const nReps = Math.floor(Math.round(videoElem.duration * fps) / framesPerRep);
 
-    while (!videoElem.paused && !videoElem.ended && videoElem.currentTime < videoElem.duration) {
-      await setIntervalX(() => {
-        // convert video frame to image blob
+    for (let i = 0; i < nReps; i++) {
+      for (let j = 0; j < framesPerRep; j++) {
+        videoElem.currentTime = (i * framesPerRep + j) / fps;
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth;
         canvas.height = videoElem.videoHeight;
@@ -80,11 +80,12 @@ export const runTest = async (
           "image": canvas.toDataURL('image/jpeg', 0.5),
           "uuid": uuid
         });
-      }, 100, nLandmarks);
+      }
       await invoke("end_repetition", {
         "uuid": uuid
       });
     }
+
     await invoke("end_set", {
       "uuid": uuid
     });

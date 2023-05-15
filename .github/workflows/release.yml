@@ -50,9 +50,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       
-      - name: Install python dependencies
-        run: pip3 install -r src-tauri/pose_extractor/requirements.txt
-
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
 

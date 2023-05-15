@@ -1,10 +1,11 @@
 import { writable } from 'svelte/store';
 import { invoke } from '@tauri-apps/api/tauri'
+import type { NormalizedLandmark } from '@mediapipe/tasks-vision';
 
 export const inputType = writable<"video" | "string">("string");
 
 export const videoPath = writable<string>("");
-export const videoJson = writable<string>("");
+export const videoJson = writable<NormalizedLandmark[][] | undefined>(undefined);
 export const videoValid = writable<boolean | undefined>(undefined);
 export const videoJustSet = writable<boolean>(false);
 
@@ -27,7 +28,7 @@ videoPath.subscribe((value) => {
   inputType.subscribe($ => $inputType = $);
   if ($inputType !== "video") return;
 
-  videoJson.set("");
+  videoJson.set(undefined);
   videoValid.set(undefined);
   if (value !== "")
     videoJustSet.set(true);
@@ -39,8 +40,8 @@ videoJson.subscribe((value) => {
   inputType.subscribe($ => $inputType = $);
   if ($inputType !== "video") return;
   
-  if (value !== "")
-    invoke('set_expectation_landmarks', { landmarks: value })
+  if (value)
+    invoke('set_expectation_landmarks', { landmarks: JSON.stringify(value) })
       .then(res => 
         videoValid.set(res as boolean)
       );
