@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/tauri'
 import type { NormalizedLandmark } from '@mediapipe/tasks-vision';
 
 export const inputType = writable<"video" | "string">("string");
+export const frames_per_repetition = writable<number>(0);
 
 export const videoPath = writable<string>("");
 export const videoJson = writable<NormalizedLandmark[][] | undefined>(undefined);
@@ -11,7 +12,6 @@ export const videoJustSet = writable<boolean>(false);
 
 export const jsonObject = writable<string>("");
 export const jsonValid = writable<boolean>(true);
-export const landmarks = writable<Array<Array<object>>|undefined>();
 
 jsonObject.subscribe((value) => {
   let $inputType;
@@ -20,7 +20,11 @@ jsonObject.subscribe((value) => {
   
   invoke('unset_expectation');
   invoke('set_expectation_landmarks', { landmarks: value })
-    .then(res => jsonValid.set(res as boolean));
+    .then(res => {
+      jsonValid.set(res as boolean);
+      if (value !== "")
+        frames_per_repetition.set(JSON.parse(value).length);
+    });
 });
 
 videoPath.subscribe((value) => {
@@ -39,10 +43,11 @@ videoJson.subscribe((value) => {
   let $inputType;
   inputType.subscribe($ => $inputType = $);
   if ($inputType !== "video") return;
-  
-  if (value)
-    invoke('set_expectation_landmarks', { landmarks: JSON.stringify(value) })
-      .then(res => 
-        videoValid.set(res as boolean)
-      );
+  if (!value) return;
+
+  invoke('set_expectation_landmarks', { landmarks: JSON.stringify(value) })
+    .then(res => {
+      videoValid.set(res as boolean);
+      frames_per_repetition.update(() => value.length);
+    });
 });

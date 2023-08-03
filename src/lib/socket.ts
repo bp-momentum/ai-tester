@@ -1,6 +1,5 @@
 import { invoke } from "@tauri-apps/api";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { setIntervalX } from "./helper";
 
 export const testCleanup = async (
   unlisten: Promise<UnlistenFn>[],
@@ -45,6 +44,11 @@ export const runTest = async (
   videoElem.muted = true;
   videoElem.pause();
   videoElem.currentTime = 0;
+  await new Promise((resolve, )=>{
+    videoElem.addEventListener("seeked", ()=>{
+      return resolve(0);
+    });
+  });
 
   liveFeedbackElem.value = "";
   persistentFeedbackElem.value = "";
@@ -71,6 +75,11 @@ export const runTest = async (
     for (let i = 0; i < nReps; i++) {
       for (let j = 0; j < framesPerRep; j++) {
         videoElem.currentTime = (i * framesPerRep + j) / fps;
+        await new Promise((resolve, )=>{
+          videoElem.addEventListener("seeked", ()=>{
+            return resolve(0);
+          });
+        });
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth;
         canvas.height = videoElem.videoHeight;

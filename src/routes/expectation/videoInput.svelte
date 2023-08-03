@@ -99,6 +99,11 @@
 
     video.pause();
     video.currentTime = 0;
+    await new Promise((resolve,)=>{
+      video.addEventListener("seeked", ()=>{
+        return resolve(0);
+      });
+    });
     // step through the video in 10 fps steps
     const fps = 10;
     const step = Math.round(video.duration * fps);
@@ -127,6 +132,11 @@
       }
 
       video.currentTime = i / fps;
+      await new Promise((resolve,)=>{
+        video.addEventListener("seeked", ()=>{
+          return resolve(0);
+        });
+      });
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       poseLandmarker.detect(canvas, (result) => {
         if (result.landmarks[0] === undefined) {
